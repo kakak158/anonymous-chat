@@ -12,8 +12,6 @@ interface Message {
 const Chat = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
-
-  // 1️⃣ Create a ref to track the last message
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,14 +23,16 @@ const Chat = () => {
     return () => unsubscribe();
   }, []);
 
-  // 2️⃣ Whenever messages change, scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   function send(text: string) {
-    addMessage(text);
-    setInput("");
+    if (text.trim()) {
+      // Don't send empty messages
+      addMessage(text);
+      setInput("");
+    }
   }
 
   function handleKeyPress(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -43,31 +43,32 @@ const Chat = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen p-4 overflow-y-auto">
-      <h1 className="text-5xl text-center font-extrabold pb-4 border-b-2 mb-4">
+    <div className="flex flex-col h-screen">
+      <h1 className="text-5xl text-center font-extrabold p-4 border-b-2">
         Under The Bridge - A Truly Anonymous Chatroom
       </h1>
-      {/* 3️⃣ Messages container */}
-      <div className="flex-1 overflow-y-auto mb-16">
+
+      {/* Messages container - this should scroll */}
+      <div className="flex-1 overflow-y-auto p-4 pb-24">
         {messages.map((m, i) => (
           <p key={i} className="text-gray-800 mb-1">
             {m.text}
           </p>
         ))}
-
-        {/* 4️⃣ Invisible element to scroll to */}
         <div ref={bottomRef} />
       </div>
 
-      {/* 5️⃣ Input bar */}
-      <input
-        className="w-[80%] absolute bottom-2 left-1/2 transform -translate-x-1/2 border rounded-full px-4 py-2 bg-white shadow text-gray-500 focus:text-black"
-        type="text"
-        placeholder="type anonymously here..."
-        onKeyDown={handleKeyPress}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-      />
+      {/* Fixed input bar */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t">
+        <input
+          className="w-full max-w-3xl mx-auto block border rounded-full px-4 py-2 bg-white shadow text-gray-500 focus:text-black focus:outline-none"
+          type="text"
+          placeholder="type anonymously here..."
+          onKeyDown={handleKeyPress}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+      </div>
     </div>
   );
 };
