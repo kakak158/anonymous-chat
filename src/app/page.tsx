@@ -4,8 +4,13 @@ import { db } from "@/firebase";
 import { addMessage } from "@/firebaseTools";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 
+interface Message {
+  text: string;
+  createdAt?: unknown;
+}
+
 const Chat = () => {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
 
   // 1️⃣ Create a ref to track the last message
@@ -14,7 +19,7 @@ const Chat = () => {
   useEffect(() => {
     const q = query(collection(db, "messages"), orderBy("createdAt", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const allMessages = snapshot.docs.map((doc) => doc.data());
+      const allMessages = snapshot.docs.map((doc) => doc.data() as Message);
       setMessages(allMessages);
     });
     return () => unsubscribe();
